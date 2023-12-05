@@ -2,7 +2,7 @@
   "tasks": {
     "dev": "deno run -A --watch main2.tsx",
     "mp4": "ffmpeg -y -framerate 32 -i images/image_%02d.png -vcodec libx264 -pix_fmt yuv420p -r 60 out.mp4",
-    "gif": "ffmpeg -y -framerate 16 -i images/image_%02d.png -vf \"fps=8,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=32:reserve_transparent=0[p];[s1][p]paletteuse\" out.gif"
+    "gif": "ffmpeg -y -framerate 32 -i images/image_%02d.png -vf \"fps=16,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=32:reserve_transparent=0[p];[s1][p]paletteuse\" out.gif"
   },
   "imports": {
     "react": "https://esm.sh/react@18.2.0",

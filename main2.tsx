@@ -46,9 +46,7 @@ function render(index: number) {
   const height = 630;
   const jumpHeightMax = 96;
   const y = Math.abs(Math.sin(index * Math.PI * 2 / FRAME_16)) * jumpHeightMax;
-  const transform = `translateY(${-y + 64}px) scale(${
-    y / jumpHeightMax / 5 + 1
-  })`;
+  const transform = `translateY(${-y + 64}px)`;
 
   const imageIndex = Math.floor(index / FRAME_4) % images.length;
 
