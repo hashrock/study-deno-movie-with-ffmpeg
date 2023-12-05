@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
+    "mp4": "ffmpeg -framerate 16 -i images/image_%02d.png -vcodec libx264 -pix_fmt yuv420p -r 60 out.mp4"
   },
   "imports": {
     "react": "https://esm.sh/react@18.2.0",
