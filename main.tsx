@@ -67,13 +67,16 @@ function render(index: number) {
   );
 }
 
+console.time("render");
 for (let i = 0; i < 64; i++) {
   const res = await render(i);
   Deno.mkdir("images", { recursive: true });
   if (res.body) {
-    Deno.writeFile(
+    await Deno.writeFile(
       `images/image_${i.toString().padStart(2, "0")}.png`,
       res.body,
     );
   }
 }
+
+console.timeEnd("render");
