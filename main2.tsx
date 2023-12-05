@@ -11,7 +11,7 @@ const imageSize = {
   width: 633,
   height: 488,
 };
-const imageScale = 0.8;
+const imageScale = 0.6;
 
 const images = [
   await imageToBase64("./walk-deno-1.png"),
@@ -20,12 +20,13 @@ const images = [
   await imageToBase64("./walk-deno-2.png"),
 ];
 
+const sabotainImage = await imageToBase64("./sabotain.png");
+
 const pallete = [
-  "#ffe2a9",
-  "#ff7200",
-  "#3335c6",
-  "#00af63",
-  "#ff7663",
+  "#2855ff",
+  "#da7dff",
+  "#fffd70",
+  "#ff52aa",
 ];
 function easeInOutQuint(x: number): number {
   return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
@@ -35,21 +36,44 @@ const interBold = await (await fetch(
   "https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-Bold.ttf",
 )).arrayBuffer();
 
+const FRAMERATE = 64;
+const FRAME_16 = FRAMERATE / 2;
+const FRAME_4 = FRAMERATE / 8;
+const LENGTH = 2;
+
 function render(index: number) {
   const width = 1200;
   const height = 630;
   const jumpHeightMax = 96;
-  const y = Math.abs(Math.sin(index * Math.PI * 2 / 16)) * jumpHeightMax;
+  const y = Math.abs(Math.sin(index * Math.PI * 2 / FRAME_16)) * jumpHeightMax;
   const transform = `translateY(${-y + 32}px) scale(${
     y / jumpHeightMax / 5 + 1
   })`;
 
-  const imageIndex = Math.floor(index / 4) % images.length;
+  const imageIndex = Math.floor(index / FRAME_4) % images.length;
 
-  const colorIndex = Math.floor(index / 16) % pallete.length;
+  const colorIndex = Math.floor(index / FRAME_16) % pallete.length;
   const beforeColor = pallete[colorIndex];
   const afterColor = pallete[(colorIndex + 1) % pallete.length];
-  const bgCircleRadius = easeInOutQuint((index % 16) / 16) * width / 2 * 1.5;
+  const bgCircleRadius = easeInOutQuint((index % FRAME_16) / FRAME_16) * width /
+    2 * 1.5;
+
+  const tick = index % FRAMERATE;
+  const tickStd = tick / FRAMERATE;
+
+  const sabotains = [];
+  const gridSize = 200;
+  for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 9; x++) {
+      sabotains.push({
+        x: x * gridSize - gridSize / 2 + y * gridSize / 2 - gridSize * 2 +
+          (tickStd * gridSize),
+        y: y * gridSize - gridSize / 2,
+        scale: 1,
+        rotation: 0,
+      });
+    }
+  }
 
   return new ImageResponse(
     <div
@@ -76,6 +100,36 @@ function render(index: number) {
       >
         <circle r={bgCircleRadius} cx={600} cy={315} fill={afterColor} />
       </svg>
+      {
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {sabotains.map((sabotain) => {
+            return (
+              <img
+                width={95}
+                height={115}
+                src={sabotainImage}
+                style={{
+                  transform:
+                    `translate(${sabotain.x}px, ${sabotain.y}px) scale(${sabotain.scale}) rotate(${sabotain.rotation}deg)`,
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                }}
+              />
+            );
+          })}
+        </div>
+      }
+
       <div
         style={{
           fontSize: 200,
@@ -114,7 +168,7 @@ function render(index: number) {
 }
 
 console.time("render");
-for (let i = 0; i < 64; i++) {
+for (let i = 0; i < FRAMERATE * LENGTH; i++) {
   const res = await render(i);
   Deno.mkdir("images", { recursive: true });
   if (res.body) {
@@ -122,6 +176,7 @@ for (let i = 0; i < 64; i++) {
       `images/image_${i.toString().padStart(2, "0")}.png`,
       res.body,
     );
+    console.log(`rendered ${i}`);
   }
 }
 
